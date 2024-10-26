@@ -2,7 +2,6 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 import crud, database, schemas
-import models
 
 app = FastAPI()
 
@@ -16,7 +15,7 @@ def get_db_session() -> Session:
 
 
 @app.get("/")
-def root():
+def root() -> dict:
     """Welcome screen"""
     return {"message": "Welcome to FastAPI library manager"}
 
@@ -39,3 +38,31 @@ def create_author(
             status_code=400, detail="Author with such name already exist"
         )
     return crud.create_author(db_session=db_session, author=author)
+
+
+@app.get("/authors/{author_id}/", response_model=schemas.AuthorInfo)
+def read_single_author(author_id: int, db_session: Session = Depends(get_db_session)):
+    db_author = crud.get_author_by_id(db_session=db_session, _id=author_id)
+
+    if db_author is None:
+        raise HTTPException(
+            status_code=404, detail=f"Author with id {author_id} not found"
+        )
+
+    return db_author
+
+
+@app.get("/books/", response_model=list[schemas.BookInfo])
+def read_books(
+    db_session: Session = Depends(get_db_session),
+    author_id: int | None = None,
+):
+    """List of books"""
+    return crud.get_all_books(db_session=db_session, author_id=author_id)
+
+
+@app.post("/books/", response_model=schemas.BookInfo)
+def create_book(
+    book: schemas.BookCreate, db_session: Session = Depends(get_db_session)
+):
+    return crud.create_book(db_session=db_session, book=book)
