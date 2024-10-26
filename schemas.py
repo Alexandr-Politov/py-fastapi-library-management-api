@@ -1,15 +1,12 @@
 from datetime import date
 from pydantic import BaseModel
-from typing import ForwardRef, List, Optional
-
-
-BookAuthorInfo = ForwardRef("AuthorInfo")
 
 
 class BookBase(BaseModel):
     title: str
-    summary: Optional[str] = None
+    summary: str
     publication_date: date
+    author_id: int
 
 
 class BookCreate(BookBase):
@@ -18,7 +15,6 @@ class BookCreate(BookBase):
 
 class BookInfo(BookBase):
     id: int
-    author: BookAuthorInfo
 
     class Config:
         orm_mode = True
@@ -26,19 +22,15 @@ class BookInfo(BookBase):
 
 class AuthorBase(BaseModel):
     name: str
-    bio: Optional[str] = None
+    bio: str
 
 
 class AuthorCreate(AuthorBase):
     pass
 
 
-class AuthorInfo(BaseModel):
+class AuthorInfo(AuthorBase):
     id: int
-    books: List[BookInfo] = []
 
     class Config:
         orm_mode = True
-
-
-BookInfo.update_forward_refs()
