@@ -27,7 +27,7 @@ def create_author(db_session: Session, author: schemas.AuthorCreate):
 def get_all_books(db_session: Session, author_id: int | None = None):
     queryset = db_session.query(models.Book)
     if author_id:
-        queryset.filter(models.Book.author_id == author_id)
+        queryset = queryset.filter(models.Book.author_id == author_id)
     return queryset.all()
 
 
