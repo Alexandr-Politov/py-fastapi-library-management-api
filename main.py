@@ -21,9 +21,11 @@ def root() -> dict:
 
 
 @app.get("/authors/", response_model=list[schemas.AuthorInfo])
-def read_authors(db_session: Session = Depends(get_db_session)):
+def read_authors(
+    skip: int = 0, limit: int = 10, db_session: Session = Depends(get_db_session)
+):
     """List of authors"""
-    return crud.get_all_authors(db_session=db_session)
+    return crud.get_all_authors(db_session=db_session)[skip:skip + limit]
 
 
 @app.post("/authors/", response_model=schemas.AuthorInfo)
@@ -54,11 +56,13 @@ def read_single_author(author_id: int, db_session: Session = Depends(get_db_sess
 
 @app.get("/books/", response_model=list[schemas.BookInfo])
 def read_books(
+    skip: int = 0, limit: int = 10,
     db_session: Session = Depends(get_db_session),
     author_id: int | None = None,
 ):
     """List of books"""
-    return crud.get_all_books(db_session=db_session, author_id=author_id)
+    books = crud.get_all_books(db_session=db_session, author_id=author_id)
+    return books[skip:skip + limit]
 
 
 @app.post("/books/", response_model=schemas.BookInfo)
